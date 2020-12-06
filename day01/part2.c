@@ -19,6 +19,8 @@ int main() {
             }
         }
 
+        fclose(modulesFile);
+
         printf("%d", totalFuel);
     }
 

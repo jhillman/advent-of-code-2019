@@ -13,6 +13,8 @@ int main() {
             totalFuel += (mass / 3) - 2;
         }
 
+        fclose(modulesFile);
+
         printf("%d", totalFuel);
     }
 
