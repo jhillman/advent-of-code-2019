@@ -65,16 +65,16 @@ struct Program *copyProgram(struct Program *program) {
 	return programCopy;
 }
 
-void initializeProgram(struct Program *program, int verb, int noun) {
-    program->data[1] = verb;
-    program->data[2] = noun;
-}
-
-int programVerb(struct Program *program) {
-    return program->data[1];
+void initializeProgram(struct Program *program, int noun, int verb) {
+    program->data[1] = noun;
+    program->data[2] = verb;
 }
 
 int programNoun(struct Program *program) {
+    return program->data[1];
+}
+
+int programVerb(struct Program *program) {
     return program->data[2];
 }
 

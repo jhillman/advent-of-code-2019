@@ -11,13 +11,13 @@ int main() {
         struct Program *testProgram = NULL;
         int outputFound = 0;
 
-        for (int verb = 0; !outputFound && verb < 100; verb++) {
-            for (int noun = 0; !outputFound && noun < 100; noun++) {
+        for (int noun = 0; !outputFound && noun < 100; noun++) {
+            for (int verb = 0; !outputFound && verb < 100; verb++) {
                 freeProgram(testProgram);
 
                 testProgram = copyProgram(program);
 
-                initializeProgram(testProgram, verb, noun);
+                initializeProgram(testProgram, noun, verb);
 
                 runProgram(testProgram);
 
@@ -27,7 +27,7 @@ int main() {
             }
         }
 
-        printf("%d", 100 * programVerb(testProgram) + programNoun(testProgram));
+        printf("%d", 100 * programNoun(testProgram) + programVerb(testProgram));
 
         freeProgram(testProgram);
         freeProgram(program);
