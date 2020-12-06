@@ -53,16 +53,16 @@ struct Program *readProgram(char *filename) {
 }
 
 struct Program *copyProgram(struct Program *program) {
-	struct Program *programCopy = (struct Program *)calloc(1, sizeof(struct Program));
-	programCopy->data = (int *)calloc(program->length, sizeof(int));
+    struct Program *programCopy = (struct Program *)calloc(1, sizeof(struct Program));
+    programCopy->data = (int *)calloc(program->length, sizeof(int));
 
-	for (int i = 0; i < program->length; i++) {
-		programCopy->data[i] = program->data[i];
-	}
+    for (int i = 0; i < program->length; i++) {
+        programCopy->data[i] = program->data[i];
+    }
 
-	programCopy->length = program->length;
+    programCopy->length = program->length;
 
-	return programCopy;
+    return programCopy;
 }
 
 void initializeProgram(struct Program *program, int noun, int verb) {
@@ -87,14 +87,14 @@ void runProgram(struct Program *program) {
                 program->data[program->data[instructionOffset + 3]] = 
                     program->data[program->data[instructionOffset + 1]] + program->data[program->data[instructionOffset + 2]];
 
-		        instructionOffset += 4;
+                instructionOffset += 4;
                 break;
             case 2:
                 program->data[program->data[instructionOffset + 3]] = 
                     program->data[program->data[instructionOffset + 1]] * program->data[program->data[instructionOffset + 2]];
         
-		        instructionOffset += 4;
-        		break;
+                instructionOffset += 4;
+                break;
             case 99:
                 instructionOffset = program->length;    
         }
