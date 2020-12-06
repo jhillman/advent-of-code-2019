@@ -13,9 +13,7 @@ int main() {
 
         for (int verb = 0; !outputFound && verb < 100; verb++) {
             for (int noun = 0; !outputFound && noun < 100; noun++) {
-                if (testProgram) {
-                    freeProgram(testProgram);
-                }
+                freeProgram(testProgram);
 
                 testProgram = copyProgram(program);
 
