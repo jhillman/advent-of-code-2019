@@ -3,13 +3,13 @@
 #include <stdio.h>
 
 int main() {
-    FILE *modulesFile = fopen("modules.txt", "r");
+    FILE *inputFile = fopen("input.txt", "r");
 
-    if (modulesFile) {
+    if (inputFile) {
         int mass;
         int totalFuel = 0;
 
-        while (!feof(modulesFile) && fscanf(modulesFile, "%d", &mass)) {
+        while (!feof(inputFile) && fscanf(inputFile, "%d", &mass)) {
             int fuel = (mass / 3) - 2;
 
             while (fuel > 0) {
@@ -19,7 +19,7 @@ int main() {
             }
         }
 
-        fclose(modulesFile);
+        fclose(inputFile);
 
         printf("%d", totalFuel);
     }

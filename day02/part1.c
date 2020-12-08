@@ -4,7 +4,7 @@
 #include "../intcode.h"
 
 int main() {
-    struct Program *program = readProgram("program.txt");
+    struct Program *program = readProgram("input.txt");
 
     if (program) {
         initializeProgram(program, 12, 2);

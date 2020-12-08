@@ -41,6 +41,8 @@ struct Program *readProgram(char *filename) {
             data[dataIndex++] = input;
         }
 
+        fclose(programFile);
+
         struct Program *program = (struct Program *)calloc(1, sizeof(struct Program));
 
         program->data = data;
