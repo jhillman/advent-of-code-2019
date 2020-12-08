@@ -34,6 +34,4 @@ EOF
     done
 
     touch input.txt
-
-    popd > /dev/null
 fi
