@@ -108,7 +108,6 @@ void runProgram(struct Program *program) {
 
         int parameter1;
         int parameter2;
-        int parameter3;
 
         switch (opcode) {
             case 1:
