@@ -1,6 +1,3 @@
-#ifndef H_INTCODE
-#define H_INTCODE
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,7 +7,7 @@ struct Program {
 };
 
 struct Program *readProgram(char *filename) {
-    FILE *programFile = fopen("program.txt", "r");
+    FILE *programFile = fopen(filename, "r");
 
     if (programFile) {
         char ch;
@@ -80,29 +77,6 @@ int programVerb(struct Program *program) {
     return program->data[2];
 }
 
-void runProgram(struct Program *program) {
-    int instructionOffset = 0;
-
-    while (instructionOffset < program->length) {
-        switch (program->data[instructionOffset]) {
-            case 1:
-                program->data[program->data[instructionOffset + 3]] = 
-                    program->data[program->data[instructionOffset + 1]] + program->data[program->data[instructionOffset + 2]];
-
-                instructionOffset += 4;
-                break;
-            case 2:
-                program->data[program->data[instructionOffset + 3]] = 
-                    program->data[program->data[instructionOffset + 1]] * program->data[program->data[instructionOffset + 2]];
-        
-                instructionOffset += 4;
-                break;
-            case 99:
-                instructionOffset = program->length;    
-        }
-    }
-}
-
 void printProgram(struct Program *program) {
     for (int i = 0; i < program->length; i++) {
         printf("%d%s", program->data[i], i < program->length - 1 ? "," : "");
@@ -111,11 +85,107 @@ void printProgram(struct Program *program) {
     printf("\n");
 }
 
+int programParameter(struct Program *program, int mode, int offset) {
+    return mode == 0 ? program->data[program->data[offset]] : program->data[offset];
+}
+
+void runProgram(struct Program *program) {
+    int offset = 0;
+
+    while (offset < program->length) {
+        int instruction = program->data[offset];
+
+        int opcode = instruction % 100;
+        instruction = instruction / 100;
+
+        int mode1 = instruction % 10;
+        instruction /= 10;
+
+        int mode2 = instruction % 10;
+        instruction /= 10;
+
+        int mode3 = instruction;
+
+        int parameter1;
+        int parameter2;
+        int parameter3;
+
+        switch (opcode) {
+            case 1:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                program->data[program->data[offset + 3]] = parameter1 + parameter2;
+
+                offset += 4;
+                break;
+            case 2:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                program->data[program->data[offset + 3]] = parameter1 * parameter2;
+        
+                offset += 4;
+                break;
+            case 3:
+                scanf("%d", &parameter1);
+
+                program->data[program->data[offset + 1]] = parameter1;
+
+                offset += 2;
+                break;
+            case 4:
+                parameter1 = programParameter(program, mode1, offset + 1);
+
+                printf("%d\n", parameter1);
+
+                offset += 2;
+                break;
+            case 5:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                if (parameter1) {
+                    offset = parameter2;
+                } else {
+                    offset += 3;
+                }
+                break;
+            case 6:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                if (!parameter1) {
+                    offset = parameter2;
+                } else {
+                    offset += 3;
+                }
+                break;
+            case 7:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                program->data[program->data[offset + 3]] = parameter1 < parameter2 ? 1 : 0;
+
+                offset += 4;
+                break;
+            case 8:
+                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter2 = programParameter(program, mode2, offset + 2);
+
+                program->data[program->data[offset + 3]] = parameter1 == parameter2 ? 1 : 0;
+
+                offset += 4;
+                break;
+            case 99:
+                offset = program->length;    
+        }
+    }
+}
+
 void freeProgram(struct Program *program) {
     if (program) {
         free(program->data);
         free(program);
     }
 }
-
-#endif
