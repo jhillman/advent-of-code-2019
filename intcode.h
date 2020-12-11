@@ -1,12 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h> 
+
+enum { READ, WRITE };
 
 struct Program {
+    char *identifier;
+    
     int *data;
     int length;
+
+    int input[2];
+    int output[2];
 };
 
-struct Program *readProgram(char *filename) {
+struct Program *readProgram(char *filename, char *identifier) {
     FILE *programFile = fopen(filename, "r");
 
     if (programFile) {
@@ -42,6 +50,7 @@ struct Program *readProgram(char *filename) {
 
         struct Program *program = (struct Program *)calloc(1, sizeof(struct Program));
 
+        program->identifier = identifier;
         program->data = data;
         program->length = length;
 
@@ -51,8 +60,10 @@ struct Program *readProgram(char *filename) {
     return NULL;
 }
 
-struct Program *copyProgram(struct Program *program) {
+struct Program *copyProgram(struct Program *program, char *identifier) {
     struct Program *programCopy = (struct Program *)calloc(1, sizeof(struct Program));
+
+    programCopy->identifier = identifier;
     programCopy->data = (int *)calloc(program->length, sizeof(int));
 
     for (int i = 0; i < program->length; i++) {
@@ -62,6 +73,12 @@ struct Program *copyProgram(struct Program *program) {
     programCopy->length = program->length;
 
     return programCopy;
+}
+
+void resetProgram(struct Program *program, int *data) {
+    for (int i = 0; i < program->length; i++) {
+        program->data[i] = data[i];
+    }
 }
 
 void initializeProgram(struct Program *program, int noun, int verb) {
@@ -127,7 +144,11 @@ void runProgram(struct Program *program) {
                 offset += 4;
                 break;
             case 3:
-                scanf("%d", &parameter1);
+                if (program->input[READ]) {
+                    read(program->input[READ], &parameter1, sizeof(parameter1));
+                } else {
+                    scanf("%d", &parameter1);
+                }
 
                 program->data[program->data[offset + 1]] = parameter1;
 
@@ -136,7 +157,11 @@ void runProgram(struct Program *program) {
             case 4:
                 parameter1 = programParameter(program, mode1, offset + 1);
 
-                printf("%d\n", parameter1);
+                if (program->output[WRITE]) {
+                    write(program->output[WRITE], &parameter1, sizeof(int));
+                } else {
+                    printf("%d\n", parameter1);
+                }
 
                 offset += 2;
                 break;
@@ -185,6 +210,21 @@ void runProgram(struct Program *program) {
 void freeProgram(struct Program *program) {
     if (program) {
         free(program->data);
+
+        if (program->input[READ]) {
+            close(program->input[READ]);
+        }
+        if (program->input[WRITE]) {
+            close(program->input[WRITE]);
+        }
+
+        if (program->output[READ]) {
+            close(program->output[READ]);
+        }
+        if (program->output[WRITE]) {
+            close(program->output[WRITE]);
+        }
+
         free(program);
     }
 }

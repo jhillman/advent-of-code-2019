@@ -2,9 +2,9 @@
 
 if [ "$1" != "" ]; then
     day=$1
-    dayString=day
+    dayString=$1
      
-    if [[ $dayString != [0-9][0-9] ]]; then
+    if [[ $dayString == [0-9] ]]; then
         dayString="0${day}"
     fi
 
