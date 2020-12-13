@@ -145,7 +145,7 @@ void runProgram(struct Program *program) {
                 break;
             case 3:
                 if (program->input[READ]) {
-                    read(program->input[READ], &parameter1, sizeof(parameter1));
+                    while(!read(program->input[READ], &parameter1, sizeof(parameter1)));
                 } else {
                     scanf("%d", &parameter1);
                 }

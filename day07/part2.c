@@ -1,17 +1,84 @@
-/* Day 7, part 2 = ? */
+/* Day 7, part 2 = 89603079 */
 
 #include <stdio.h>
+#include "phase.h"
+#include "../intcode.h"
 
 int main() {
-    FILE *inputFile = fopen("input.txt", "r");
+    struct Program *program = readProgram("input.txt", "original");
 
-    if (inputFile) {
-        int answer = 0;
+    struct Program *programA = copyProgram(program, "a");
+    struct Program *programB = copyProgram(program, "b");
+    struct Program *programC = copyProgram(program, "c");
+    struct Program *programD = copyProgram(program, "e");
+    struct Program *programE = copyProgram(program, "e");
 
-        fclose(inputFile);
+    struct Program *programs[] = {
+        programA,
+        programB,
+        programC,
+        programD,
+        programE
+    };
 
-        printf("%d", answer);
+    struct PhaseSequenceData data = getPhaseSequenceData(5, 9);
+
+    for (int i = 0; i < data.phaseSequenceLength; i++) {
+        if (i > 0) {
+            programs[i]->input[WRITE] = programs[i - 1]->output[WRITE];
+            programs[i]->input[READ] = programs[i - 1]->output[READ];
+        }
+
+        pipe(programs[i]->output);
     }
+
+    programA->input[WRITE] = programE->output[WRITE];
+    programA->input[READ] = programE->output[READ];
+
+    int maxSignal = 0;
+
+    for (int i = 0; i < data.phaseSequenceCount; i++) {
+        struct PhaseSequence phaseSequence = data.phaseSequences[i];
+
+        for (int j = 0; j < data.phaseSequenceLength; j++) {
+            int phase = *((int *)&phaseSequence + j);
+
+            write(programs[j]->input[WRITE], &phase, sizeof(phase));
+        }
+
+        int aInput = 0;
+        write(programA->input[WRITE], &aInput, sizeof(aInput));
+
+        for (int j = 0; j < data.phaseSequenceLength; j++) {
+            if (fork() == 0) {
+                runProgram(programs[j]);
+                resetProgram(programs[j], program->data);
+
+                exit(0);
+            }
+        }
+    
+        for (int j = 0; j < data.phaseSequenceLength; j++) {
+            wait(NULL); 
+        }
+
+        int signal;
+        read(programE->output[READ], &signal, sizeof(signal));
+
+        if (signal > maxSignal) {
+            maxSignal = signal;
+        }
+    }
+
+    freeProgram(programA);
+    freeProgram(programB);
+    freeProgram(programC);
+    freeProgram(programD);
+    freeProgram(programE);
+
+    free(data.phaseSequences);
+
+    printf("%d", maxSignal);
 
     return 0;
 }
