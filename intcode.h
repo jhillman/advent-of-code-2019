@@ -14,7 +14,7 @@ struct Program {
     int output[2];
 };
 
-struct Program *readProgram(char *filename, char *identifier) {
+struct Program *readProgram(char *filename) {
     FILE *programFile = fopen(filename, "r");
 
     if (programFile) {
@@ -50,7 +50,6 @@ struct Program *readProgram(char *filename, char *identifier) {
 
         struct Program *program = (struct Program *)calloc(1, sizeof(struct Program));
 
-        program->identifier = identifier;
         program->data = data;
         program->length = length;
 

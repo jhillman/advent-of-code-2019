@@ -5,7 +5,7 @@
 #include "../intcode.h"
 
 int main() {
-    struct Program *program = readProgram("input.txt", "original");
+    struct Program *program = readProgram("input.txt");
 
     struct Program *programA = copyProgram(program, "a");
     struct Program *programB = copyProgram(program, "b");

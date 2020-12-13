@@ -15,7 +15,7 @@ int main() {
             for (int verb = 0; !outputFound && verb < 100; verb++) {
                 freeProgram(testProgram);
 
-                testProgram = copyProgram(program);
+                testProgram = copyProgram(program, NULL);
 
                 initializeProgram(testProgram, noun, verb);
 
