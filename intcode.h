@@ -7,7 +7,7 @@ enum { READ, WRITE };
 struct Program {
     char *identifier;
     
-    int *data;
+    long *data;
     int length;
 
     int input[2];
@@ -33,25 +33,24 @@ struct Program *readProgram(char *filename) {
             ++length;
         }
 
-        int *data = (int *)calloc(length, sizeof(int));
+        struct Program *program = (struct Program *)calloc(1, sizeof(struct Program));
+
+        program->data = (long *)calloc(length * 2, sizeof(long));
+        program->length = length;
+
         int dataIndex = 0;
 
         fseek(programFile, 0, SEEK_SET);
 
-        int input;
+        long input;
 
         while (dataIndex < length) {
-            fscanf(programFile, "%d%c", &input, &ch);
+            fscanf(programFile, "%ld%c", &input, &ch);
 
-            data[dataIndex++] = input;
+            program->data[dataIndex++] = input;
         }
 
         fclose(programFile);
-
-        struct Program *program = (struct Program *)calloc(1, sizeof(struct Program));
-
-        program->data = data;
-        program->length = length;
 
         return program;
     }
@@ -63,7 +62,7 @@ struct Program *copyProgram(struct Program *program, char *identifier) {
     struct Program *programCopy = (struct Program *)calloc(1, sizeof(struct Program));
 
     programCopy->identifier = identifier;
-    programCopy->data = (int *)calloc(program->length, sizeof(int));
+    programCopy->data = (long *)calloc(program->length, sizeof(long));
 
     for (int i = 0; i < program->length; i++) {
         programCopy->data[i] = program->data[i];
@@ -74,7 +73,7 @@ struct Program *copyProgram(struct Program *program, char *identifier) {
     return programCopy;
 }
 
-void resetProgram(struct Program *program, int *data) {
+void resetProgram(struct Program *program, long *data) {
     for (int i = 0; i < program->length; i++) {
         program->data[i] = data[i];
     }
@@ -95,18 +94,40 @@ int programVerb(struct Program *program) {
 
 void printProgram(struct Program *program) {
     for (int i = 0; i < program->length; i++) {
-        printf("%d%s", program->data[i], i < program->length - 1 ? "," : "");
+        printf("%ld%s", program->data[i], i < program->length - 1 ? "," : "");
     }
 
     printf("\n");
 }
 
-int programParameter(struct Program *program, int mode, int offset) {
-    return mode == 0 ? program->data[program->data[offset]] : program->data[offset];
+long readParameter(struct Program *program, int mode, int offset, int relativeBase) {
+    switch (mode) {
+        case 1:
+            return program->data[offset];
+        case 2:
+            return program->data[relativeBase + program->data[offset]];
+        default:
+            return program->data[program->data[offset]];
+    }
+}
+
+void writeData(struct Program *program, int mode, int offset, int relativeBase, long data) {
+    switch (mode) {
+        case 1:
+            program->data[offset] = data;
+            break;
+        case 2:
+            program->data[relativeBase + program->data[offset]] = data;
+            break;
+        default:
+            program->data[program->data[offset]] = data;
+            break;
+    }
 }
 
 void runProgram(struct Program *program) {
     int offset = 0;
+    int relativeBase = 0;
 
     while (offset < program->length) {
         int instruction = program->data[offset];
@@ -122,23 +143,23 @@ void runProgram(struct Program *program) {
 
         int mode3 = instruction;
 
-        int parameter1;
-        int parameter2;
+        long parameter1;
+        long parameter2;
 
         switch (opcode) {
             case 1:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
-                program->data[program->data[offset + 3]] = parameter1 + parameter2;
+                writeData(program, mode3, offset + 3, relativeBase, parameter1 + parameter2);
 
                 offset += 4;
                 break;
             case 2:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
-                program->data[program->data[offset + 3]] = parameter1 * parameter2;
+                writeData(program, mode3, offset + 3, relativeBase, parameter1 * parameter2);
         
                 offset += 4;
                 break;
@@ -146,27 +167,27 @@ void runProgram(struct Program *program) {
                 if (program->input[READ]) {
                     while(!read(program->input[READ], &parameter1, sizeof(parameter1)));
                 } else {
-                    scanf("%d", &parameter1);
+                    scanf("%ld", &parameter1);
                 }
 
-                program->data[program->data[offset + 1]] = parameter1;
+                writeData(program, mode1, offset + 1, relativeBase, parameter1);
 
                 offset += 2;
                 break;
             case 4:
-                parameter1 = programParameter(program, mode1, offset + 1);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
 
                 if (program->output[WRITE]) {
-                    write(program->output[WRITE], &parameter1, sizeof(int));
+                    write(program->output[WRITE], &parameter1, sizeof(parameter1));
                 } else {
-                    printf("%d\n", parameter1);
+                    printf("%ld\n", parameter1);
                 }
 
                 offset += 2;
                 break;
             case 5:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
                 if (parameter1) {
                     offset = parameter2;
@@ -175,8 +196,8 @@ void runProgram(struct Program *program) {
                 }
                 break;
             case 6:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
                 if (!parameter1) {
                     offset = parameter2;
@@ -185,21 +206,28 @@ void runProgram(struct Program *program) {
                 }
                 break;
             case 7:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
-                program->data[program->data[offset + 3]] = parameter1 < parameter2 ? 1 : 0;
+                writeData(program, mode3, offset + 3, relativeBase, parameter1 < parameter2 ? 1 : 0);
 
                 offset += 4;
                 break;
             case 8:
-                parameter1 = programParameter(program, mode1, offset + 1);
-                parameter2 = programParameter(program, mode2, offset + 2);
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                parameter2 = readParameter(program, mode2, offset + 2, relativeBase);
 
-                program->data[program->data[offset + 3]] = parameter1 == parameter2 ? 1 : 0;
+                writeData(program, mode3, offset + 3, relativeBase, parameter1 == parameter2 ? 1 : 0);
 
                 offset += 4;
                 break;
+            case 9:
+                parameter1 = readParameter(program, mode1, offset + 1, relativeBase);
+                
+                relativeBase += parameter1;
+
+                offset += 2;
+                break;    
             case 99:
                 offset = program->length;    
         }
