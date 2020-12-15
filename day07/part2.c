@@ -35,18 +35,18 @@ int main() {
     programA->input[WRITE] = programE->output[WRITE];
     programA->input[READ] = programE->output[READ];
 
-    int maxSignal = 0;
+    long maxSignal = 0;
 
     for (int i = 0; i < data.phaseSequenceCount; i++) {
         struct PhaseSequence phaseSequence = data.phaseSequences[i];
 
         for (int j = 0; j < data.phaseSequenceLength; j++) {
-            int phase = *((int *)&phaseSequence + j);
+            long phase = *((int *)&phaseSequence + j);
 
             write(programs[j]->input[WRITE], &phase, sizeof(phase));
         }
 
-        int aInput = 0;
+        long aInput = 0;
         write(programA->input[WRITE], &aInput, sizeof(aInput));
 
         for (int j = 0; j < data.phaseSequenceLength; j++) {
@@ -62,7 +62,7 @@ int main() {
             wait(NULL); 
         }
 
-        int signal;
+        long signal;
         read(programE->output[READ], &signal, sizeof(signal));
 
         if (signal > maxSignal) {
@@ -78,7 +78,7 @@ int main() {
 
     free(data.phaseSequences);
 
-    printf("%d", maxSignal);
+    printf("%ld", maxSignal);
 
     return 0;
 }

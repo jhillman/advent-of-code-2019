@@ -11,7 +11,7 @@ int main() {
 
         runProgram(program);
 
-        printf("%d", *program->data);
+        printf("%ld", *program->data);
 
         freeProgram(program);
     }
