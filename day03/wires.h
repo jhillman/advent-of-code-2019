@@ -74,7 +74,7 @@ struct Intersection findIntersection(struct Line line1, struct Line line2) {
         }
 
         if (pointInsideLine(point, line1) && pointInsideLine(point, line2)) {
-            intersection.valid = 1;
+            intersection.valid = true;
             intersection.point = point;
         }
     }
