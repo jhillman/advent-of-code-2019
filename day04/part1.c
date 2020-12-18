@@ -1,6 +1,7 @@
 /* Day 4, part 1 = 1686 */
 
 #include <stdio.h>
+#include <stdbool.h>
 
 int main() {
     FILE *inputFile = fopen("input.txt", "r");
@@ -20,8 +21,8 @@ int main() {
         for (int passwordNumber = rangeMin; passwordNumber <= rangeMax; passwordNumber++) {
             sprintf(password, "%d", passwordNumber);
 
-            int increasing = 1;
-            int twoAdjacent = 0;
+            bool increasing = true;
+            bool twoAdjacent = false;
 
             for (int i = 1; increasing && i < 6; i++) {
                 int diff = password[i] - password[i - 1];
