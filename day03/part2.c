@@ -22,28 +22,28 @@ int main() {
                                                                     (struct Line) { wire2Point1, wire2Point2 });
 
                 if (intersection.valid) {
-                    int intersectionFound = 0;
+                    bool intersectionFound = false;
                     int wire1Steps = 0;
 
                     for (int k = 1; !intersectionFound && k < data.path1Length; k++) {
                         struct Line line = { data.wire1Path[k - 1], data.wire1Path[k] };
 
                         if (pointInsideLine(intersection.point, line)) {
-                            intersectionFound = 1;
+                            intersectionFound = true;
                             wire1Steps += lineLength((struct Line) { line.point1, intersection.point });
                         } else {
                             wire1Steps += lineLength(line);
                         }
                     }
 
-                    intersectionFound = 0;
+                    intersectionFound = false;
                     int wire2Steps = 0;
 
                     for (int k = 1; !intersectionFound && k < data.path2Length; k++) {
                         struct Line line = { data.wire2Path[k - 1], data.wire2Path[k] };
 
                         if (pointInsideLine(intersection.point, line)) {
-                            intersectionFound = 1;
+                            intersectionFound = true;
                             wire2Steps += lineLength((struct Line) { line.point1, intersection.point });
                         } else {
                             wire2Steps += lineLength(line);

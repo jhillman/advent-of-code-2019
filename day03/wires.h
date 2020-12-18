@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 struct Point {
     int x;
     int y;
@@ -14,7 +16,7 @@ enum Orientation {
 };
 
 struct Intersection {
-    int valid;
+    bool valid;
     struct Point point;
 };
 
