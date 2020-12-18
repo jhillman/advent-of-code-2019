@@ -1,6 +1,7 @@
 /* Day 2, part 2 = 9074 */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "../intcode.h"
 
 int main() {
@@ -9,7 +10,7 @@ int main() {
     if (program) {
         int targetOutput = 19690720;
         struct Program *testProgram = NULL;
-        int outputFound = 0;
+        bool outputFound = false;
 
         for (int noun = 0; !outputFound && noun < 100; noun++) {
             for (int verb = 0; !outputFound && verb < 100; verb++) {
@@ -22,7 +23,7 @@ int main() {
                 runProgram(testProgram);
 
                 if (*testProgram->data == targetOutput) {
-                    outputFound = 1;
+                    outputFound = true;
                 }         
             }
         }
